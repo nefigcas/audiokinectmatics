@@ -6,6 +6,8 @@
   :dependencies [
                   [org.clojure/clojure "1.6.0"]
                   [overtone "0.9.1"]  ; here is included also the OSC "library" :)
+                  [quil "2.2.6"]
+                  [org.clojure/math.numeric-tower "0.0.4"]
                 ]
   :main ^:skip-aot audiokinectmatics.core
   :target-path "target/%s"
