@@ -1,6 +1,10 @@
 # audiokinectmatics
 
+Movement sound matching via OSC protocol
+
+<!--
 Based on Mark Changizi book Harnessed, generate sounds that match the behavior/movements of an individual moving around.
+-->
 
 ## Installation
 
