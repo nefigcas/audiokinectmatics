@@ -39,6 +39,7 @@
 (let  [ numbers (range quantity)
         strings (map #(str %1 %2) (repeat quantity "/multi/") numbers) ]
   (map #(osc-handle server %1 (fn [msg]
+    (stop)
     (toca-microtono %2)
     ;(println "MSG: " msg)
   )) strings numbers)
