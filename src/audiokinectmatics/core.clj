@@ -21,21 +21,29 @@
   (q/background 200))                 ;; Set the background colour to
                                       ;; a nice shade of grey.
 
-(defn crea-instrumentos-tonales[cantidad frecuencias-en-hz]
-  (range cantidad)
-  (definst sonido-numero [frecuencia-en-hz] (sin-osc frecuencia-en-hz))
+(defn crea-instrumentos-tonales[cantidad]
+  (let [ numeros (range cantidad)
+         ; rango audible 20Hz a 20,000Hz
+         frecuencias (range 20 20000 (/ (- 20000 20) cantidad)) ]
+    (map
+      #(definst (resolve (symbol (str sonido %1))) [] (sin-osc %2)) numeros frecuencias)
+  )
 )
 
 (defn toca-microtono[numero]
-  (sonido-numero)
+  (println numero)
+  (symbol (str sonido numero))
 )
 
 (defn osc-handlers-for-microtones[quantity]
-  (range quantity)
-  ((osc-handle server "/multi/0" (fn [msg]
-    (microtono 0)
-    (println "MSG: " msg)
-   ))
+  ;generates handler strings
+
+(let  [ numbers (range quantity)
+        strings (map #(str %1 %2) (repeat quantity "/multi/") numbers) ]
+  (map #(osc-handle server %1 (fn [msg]
+    (toca-microtono %2)
+    ;(println "MSG: " msg)
+  )) strings numbers)
 ))
 
 
@@ -46,6 +54,8 @@
   (def PORT 3333) ; 12345 is the port Synapse.app uses
   ; start a server and create a client to talk with it
   (def server (osc-server PORT))
+
+  (crea-instrumentos-tonales 64)
 
   ; creates handlers for microtone synth
   (osc-handlers-for-microtones 64)
