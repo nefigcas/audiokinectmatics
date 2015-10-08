@@ -4,10 +4,21 @@
   (:gen-class) )
 (use 'overtone.live) ; load overtone
 
+
 ; global variables for RGB-values
 (def red-v 150)
 (def green-v 150)
 (def blue-v 150)
+; Points hands
+; mano izquierda (left hand)
+(def x0 0.0)
+(def y0 0.0)
+(def z0 0.0)
+; mano derecha (right hand)
+(def x1 1.0)
+(def y1 1.0)
+(def z1 1.0)
+
 
 ; quil draw function
 (defn draw []
@@ -21,42 +32,61 @@
   (q/background 200))                 ;; Set the background colour to
                                       ;; a nice shade of grey.
 
-(defn crea-instrumentos-tonales[cantidad frecuencias-en-hz]
-  (range cantidad)
-  (definst sonido-numero [frecuencia-en-hz] (sin-osc frecuencia-en-hz))
-)
-
-(defn toca-microtono[numero]
-  (sonido-numero)
-)
-
-(defn osc-handlers-for-microtones[quantity]
-  (range quantity)
-  ((osc-handle server "/multi/0" (fn [msg]
-    (microtono 0)
-    (println "MSG: " msg)
-   ))
-))
-
-
 (defn -main
   "OSC Server receives data from android phone and synthetizes audio"
   [& args]
 
-  (def PORT 3333) ; 12345 is the port Synapse.app uses
+  (def PORT 12345) ; 12345 is the port Synapse.app uses
   ; start a server and create a client to talk with it
   (def server (osc-server PORT))
 
-  ; creates handlers for microtone synth
-  (osc-handlers-for-microtones 64)
+  (definst theremin [adj 0 volume 1 scale 1]
+    (let [sound (lpf (* (sin-osc 100000) (sin-osc (+ 100250 (* adj scale)))) 12000)]
+      (* sound volume)))
 
+    (def id (theremin))
+
+  ; creates handlers for microtone synth
+  (osc-handle server "/lefthand_pos_screen"(fn [msg]
+    (let [    x (first (:args msg))
+              y (second (:args msg))
+              z (nth (:args msg) 2)]
+         (def x0 x)
+         (def y0 y)
+         (def z0 z)
+         ))
+
+
+    ;(println "MSG: " msg)
+  )
+
+  (osc-handle server "/righthand_pos_screen"(fn [msg]
+    (let [    x (first (:args msg))
+              y (second (:args msg))
+              z (nth (:args msg) 2)
+              distancia (int (math/sqrt
+                (+
+                  (math/expt (- x1 x0) 2)
+                  (math/expt (- y1 y0) 2)
+                  (math/expt (- z1 z0) 2) )
+              ))]
+         (def x1 x)
+         (def y1 y)
+         (def z1 z)
+         (ctl id :adj distancia)
+         ; (ctl id :adj (int (- x y )) )
+         (def red-v   (mod (int x) 256) )
+         (def green-v (mod (int y) 256) )
+         (def blue-v  (mod (int z) 256)) )
+    ;(println "MSG: " msg)
+  ))
   ;remove handler
-  ;(osc-rm-handler server "/mlr")
+  ;(osc-rm-handler server "/")
 
   ; stop listening and deallocate resources
   ;(osc-close server)
 
-  (q/defsketch colorin-colorado       ;; Define a new sketch named colorin-colorado ;)
+  (q/defsketch colorin-colorado       ;; Define a new sketch named colorin-colorado
   :title "Rainbow shit"               ;; Set the title of the sketch
   :setup setup                        ;; Specify the setup fn
   :draw draw                          ;; Specify the draw fn
