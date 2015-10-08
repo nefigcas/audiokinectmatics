@@ -21,6 +21,24 @@
   (q/background 200))                 ;; Set the background colour to
                                       ;; a nice shade of grey.
 
+(defn crea-instrumentos-tonales[cantidad frecuencias-en-hz]
+  (range cantidad)
+  (definst sonido-numero [frecuencia-en-hz] (sin-osc frecuencia-en-hz))
+)
+
+(defn toca-microtono[numero]
+  (sonido-numero)
+)
+
+(defn osc-handlers-for-microtones[quantity]
+  (range quantity)
+  ((osc-handle server "/multi/0" (fn [msg]
+    (microtono 0)
+    (println "MSG: " msg)
+   ))
+))
+
+
 (defn -main
   "OSC Server receives data from android phone and synthetizes audio"
   [& args]
@@ -29,38 +47,11 @@
   ; start a server and create a client to talk with it
   (def server (osc-server PORT))
 
-  (definst theremin [adj 0 volume 1 scale 1]
-  (let [sound (lpf (* (sin-osc 100000) (sin-osc (+ 100250 (* adj scale)))) 12000)]
-    (* sound volume)))
-
-  (def id (theremin))
-
-
-  ; Register a handler function for the /test OSC address
-  ; The handler takes a message map with the following keys:
-  ;   [:src-host, :src-port, :path, :type-tag, :args]
-  (osc-handle server "/accelerometer" (fn [msg]
-    ; difference between x - y via accelerometer
-    ; distance between "origin" and 3d point, theremin parameters, etc needs more analisys
-    (let [x (first (:args msg))
-          y (second (:args msg))
-          z (nth (:args msg) 2)]
-
-     (ctl id :adj (int (math/sqrt (+  (* x x ) (* y y) (* z z)  ))))
-     ; (ctl id :adj (int (- x y )) )
-     (def red-v   (int (* 2 x)) )
-     (def green-v (int (* 2 y)) )
-     (def blue-v  (int (* 2 z))) )
-    ;(println "MSG: " msg)
-   ))
-
-
-   ;(osc-handle server "/" (fn [msg]
-  ;    (println "MSG: " msg)
-   ;))
+  ; creates handlers for microtone synth
+  (osc-handlers-for-microtones 64)
 
   ;remove handler
-  ;(osc-rm-handler server "/accelerometer")
+  ;(osc-rm-handler server "/mlr")
 
   ; stop listening and deallocate resources
   ;(osc-close server)
