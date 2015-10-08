@@ -19,20 +19,18 @@
   (q/smooth)                          ;; Turn on anti-aliasing
   (q/frame-rate 10)                    ;; Set framerate to 10 FPS
   (q/background 200))                 ;; Set the background colour to
-                                      ;; a nice shade of grey.
+                                      ;; a nice shade of grey
 
-(defn crea-instrumentos-tonales[cantidad]
-  (let [ numeros (range cantidad)
-         ; rango audible 20Hz a 20,000Hz
-         frecuencias (range 20 20000 (/ (- 20000 20) cantidad)) ]
-    (map
-      #(definst (resolve (symbol (str sonido %1))) [] (sin-osc %2)) numeros frecuencias)
-  )
-)
 
+(def PORT 3333) ; 12345 is the port Synapse.app uses
+; start a server and create a client to talk with it
+(def server (osc-server PORT))
+
+(def frecuencias (range 200.0 1000.0 (/ (- 1000.0 200.0) 64)))
 (defn toca-microtono[numero]
   (println numero)
-  (symbol (str sonido numero))
+  (sonido (nth frecuencias numero))
+  ;(@(resolve (symbol (str "sonido-" numero))))
 )
 
 (defn osc-handlers-for-microtones[quantity]
@@ -45,28 +43,26 @@
     ;(println "MSG: " msg)
   )) strings numbers)
 ))
-
+(osc-handlers-for-microtones 64)
 
 (defn -main
   "OSC Server receives data from android phone and synthetizes audio"
   [& args]
 
-  (def PORT 3333) ; 12345 is the port Synapse.app uses
-  ; start a server and create a client to talk with it
-  (def server (osc-server PORT))
-
-  (crea-instrumentos-tonales 64)
+  (definst sonido [freq 440]
+      (sin-osc freq) ; rango audible 20Hz a 20,000Hz
+  )
 
   ; creates handlers for microtone synth
-  (osc-handlers-for-microtones 64)
+  ; (osc-handlers-for-microtones 64)
 
-  ;remove handler
-  ;(osc-rm-handler server "/mlr")
+  ;remove all handlers
+  ;(osc-rm-all-listeners server)
 
   ; stop listening and deallocate resources
   ;(osc-close server)
 
-  (q/defsketch colorin-colorado       ;; Define a new sketch named colorin-colorado ;)
+  (q/defsketch colorin-colorado       ;; Define a new sketch named colorin-colorado
   :title "Rainbow shit"               ;; Set the title of the sketch
   :setup setup                        ;; Specify the setup fn
   :draw draw                          ;; Specify the draw fn
