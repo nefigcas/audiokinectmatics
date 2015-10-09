@@ -18,18 +18,12 @@
                                       ;; a nice shade of grey
 
 (def NUMERO_BOTONES (* 11 11))
+(def LIMITE_FREQ_BAJA 400.0)
+(def LIMITE_FREQ_ALTA 1000.0)
 
 (definst sonido [freq 440]
     (sin-osc freq) ; rango audible 20Hz a 20,000Hz
 )
-; Tabla de frecuencias
-(def LIMITE_FREQ_BAJA 400.0)
-(def LIMITE_FREQ_ALTA 1000.0)
-(def frecuencias
-  (range LIMITE_FREQ_BAJA LIMITE_FREQ_ALTA
-    (/ (- LIMITE_FREQ_ALTA LIMITE_FREQ_BAJA) NUMERO_BOTONES)))
-(defn toca-microtono [numero]
-  (sonido (nth frecuencias numero))) ; usa la "tabla de frecuencias" para producir el sonido deseado
 
 (defn -main
   "OSC Server receives data from android phone and synthetizes audio"
@@ -41,10 +35,14 @@
 
   ; creates handlers for microtone synth
   (let  [ numbers (range NUMERO_BOTONES)
-          strings (map #(str %1 %2) (repeat NUMERO_BOTONES "/life/") numbers) ]
+          strings (map #(str %1 %2) (repeat NUMERO_BOTONES "/life/") numbers)
+          frecuencias ;genera la "tabla de frecuencias"
+            (range LIMITE_FREQ_BAJA LIMITE_FREQ_ALTA
+              (/ (- LIMITE_FREQ_ALTA LIMITE_FREQ_BAJA) NUMERO_BOTONES))]
+
     (dorun (map   #(osc-handle server %1 (fn [msg]
       (stop)
-      (toca-microtono %2)
+      (sonido (nth frecuencias %2)) ; usa la "tabla de frecuencias" para producir el sonido deseado
       ;(println "MSG: " msg)
     )) strings numbers)))
 
