@@ -17,7 +17,7 @@
   (q/background 200))                 ;; Set the background colour to
                                       ;; a nice shade of grey
 
-(def NUMERO_BOTONES (* 11 11))
+(def NUMERO_BOTONES (* 8 8))
 (def LIMITE_FREQ_BAJA 400.0)
 (def LIMITE_FREQ_ALTA 1000.0)
 
@@ -35,7 +35,7 @@
 
   ; creates handlers for microtone synth
   (let  [ numbers (range NUMERO_BOTONES)
-          strings (map #(str %1 %2) (repeat NUMERO_BOTONES "/life/") numbers)
+          strings (map #(str %1 %2) (repeat NUMERO_BOTONES "/multi/") numbers)
           frecuencias ;genera la "tabla de frecuencias"
             (range LIMITE_FREQ_BAJA LIMITE_FREQ_ALTA
               (/ (- LIMITE_FREQ_ALTA LIMITE_FREQ_BAJA) NUMERO_BOTONES))]
