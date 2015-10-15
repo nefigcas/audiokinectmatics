@@ -66,9 +66,9 @@
               z (nth (:args msg) 2)
               distancia (int (math/sqrt
                 (+
-                  (math/expt (- x1 x0) 2)
-                  (math/expt (- y1 y0) 2)
-                  (math/expt (- z1 z0) 2) )
+                  (math/expt (- x x0) 2)
+                  (math/expt (- y y0) 2)
+                  (math/expt (- z z0) 2) )
               ))]
          (def x1 x)
          (def y1 y)
